@@ -13,6 +13,8 @@ export const ProductListing: React.FC<ProductListingProps> = ({ onNavigateToChec
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [isVisible, setIsVisible] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 8;
   
   const categories = ['All', ...Array.from(new Set(products.map(p => p.category)))];
   
@@ -23,11 +25,123 @@ export const ProductListing: React.FC<ProductListingProps> = ({ onNavigateToChec
     return matchesCategory && matchesSearch;
   });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
   const cartItemCount = state.items.reduce((total, item) => total + item.quantity, 0);
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchTerm]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    // Previous button
+    pages.push(
+      <button
+        key="prev"
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-l-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        Previous
+      </button>
+    );
+
+    // First page
+    if (startPage > 1) {
+      pages.push(
+        <button
+          key={1}
+          onClick={() => handlePageChange(1)}
+          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors"
+        >
+          1
+        </button>
+      );
+      if (startPage > 2) {
+        pages.push(
+          <span key="ellipsis1" className="px-3 py-2 text-sm text-gray-500 bg-white border-t border-b border-gray-300">
+            ...
+          </span>
+        );
+      }
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-2 text-sm font-medium border-t border-b border-gray-300 transition-colors ${
+            i === currentPage
+              ? 'bg-blue-600 text-white border-blue-600'
+              : 'bg-white text-gray-500 hover:bg-gray-50'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    // Last page
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pages.push(
+          <span key="ellipsis2" className="px-3 py-2 text-sm text-gray-500 bg-white border-t border-b border-gray-300">
+            ...
+          </span>
+        );
+      }
+      pages.push(
+        <button
+          key={totalPages}
+          onClick={() => handlePageChange(totalPages)}
+          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border-t border-b border-gray-300 hover:bg-gray-50 transition-colors"
+        >
+          {totalPages}
+        </button>
+      );
+    }
+
+    // Next button
+    pages.push(
+      <button
+        key="next"
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      >
+        Next
+      </button>
+    );
+
+    return pages;
+  };
 
   return (
     <div className="min-h-screen gradient-bg">
@@ -133,6 +247,11 @@ export const ProductListing: React.FC<ProductListingProps> = ({ onNavigateToChec
                   Results for "{searchTerm}"
                 </p>
               )}
+              {totalPages > 1 && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
+                </p>
+              )}
             </div>
             
             {/* Sort Options */}
@@ -150,7 +269,7 @@ export const ProductListing: React.FC<ProductListingProps> = ({ onNavigateToChec
 
         {/* Products Grid */}
         <div className={`grid-responsive transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-          {filteredProducts.map((product: Product, index: number) => (
+          {currentProducts.map((product: Product, index: number) => (
             <div 
               key={product.id}
               className="fade-in"
@@ -160,6 +279,15 @@ export const ProductListing: React.FC<ProductListingProps> = ({ onNavigateToChec
             </div>
           ))}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-12 flex justify-center">
+            <nav className="flex items-center space-x-0" aria-label="Pagination">
+              {renderPagination()}
+            </nav>
+          </div>
+        )}
         
         {/* Empty State */}
         {filteredProducts.length === 0 && (
@@ -184,15 +312,6 @@ export const ProductListing: React.FC<ProductListingProps> = ({ onNavigateToChec
               className="btn-primary"
             >
               Clear Filters
-            </button>
-          </div>
-        )}
-
-        {/* Load More Button */}
-        {filteredProducts.length > 0 && (
-          <div className="text-center mt-12 fade-in">
-            <button className="btn-secondary">
-              Load More Products
             </button>
           </div>
         )}
