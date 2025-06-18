@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { CartReview } from './CartReview';
-import { ShippingForm } from './ShippingForm';
-import { PaymentForm } from './PaymentForm';
-import { OrderSummary } from './OrderSummary';
-import { OrderConfirmation } from './OrderConfirmation';
-import { useCart } from '../context/CartContext';
-import type { CheckoutStep, ShippingInfo, PaymentMethod, Order } from '../types';
+import React, { useState, useEffect } from "react";
+import { CartReview } from "./CartReview";
+import { ShippingForm } from "./ShippingForm";
+import { PaymentForm } from "./PaymentForm";
+import { OrderSummary } from "./OrderSummary";
+import { OrderConfirmation } from "./OrderConfirmation";
+import { useCart } from "../context/CartContext";
+import type {
+  CheckoutStep,
+  ShippingInfo,
+  PaymentMethod,
+  Order,
+} from "../types";
 
 interface CheckoutProps {
   onNavigateToProducts?: () => void;
@@ -13,25 +18,25 @@ interface CheckoutProps {
 
 export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
   const { state } = useCart();
-  const [currentStep, setCurrentStep] = useState<CheckoutStep>('cart');
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>("cart");
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    country: "",
   });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>({
-    type: 'credit',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardholderName: '',
-    paypalEmail: ''
+    type: "credit",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    cardholderName: "",
+    paypalEmail: "",
   });
   const [order, setOrder] = useState<Order | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -42,27 +47,27 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
       setIsMobile(window.innerWidth < 768);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const steps = [
-    { id: 'cart', name: 'Cart', icon: '🛒', shortName: 'Cart' },
-    { id: 'shipping', name: 'Shipping', icon: '📦', shortName: 'Ship' },
-    { id: 'payment', name: 'Payment', icon: '💳', shortName: 'Pay' },
-    { id: 'summary', name: 'Summary', icon: '📋', shortName: 'Review' },
-    { id: 'confirmation', name: 'Done', icon: '✅', shortName: 'Done' }
+    { id: "cart", name: "Cart", icon: "🛒", shortName: "Cart" },
+    { id: "shipping", name: "Shipping", icon: "📦", shortName: "Ship" },
+    { id: "payment", name: "Payment", icon: "💳", shortName: "Pay" },
+    { id: "summary", name: "Summary", icon: "📋", shortName: "Review" },
+    { id: "confirmation", name: "Done", icon: "✅", shortName: "Done" },
   ];
 
   const handleNext = () => {
-    const currentIndex = steps.findIndex(step => step.id === currentStep);
+    const currentIndex = steps.findIndex((step) => step.id === currentStep);
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1].id as CheckoutStep);
     }
   };
 
   const handleBack = () => {
-    const currentIndex = steps.findIndex(step => step.id === currentStep);
+    const currentIndex = steps.findIndex((step) => step.id === currentStep);
     if (currentIndex > 0) {
       setCurrentStep(steps[currentIndex - 1].id as CheckoutStep);
     }
@@ -75,35 +80,35 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
       shippingInfo,
       paymentMethod,
       total: state.total,
-      date: new Date()
+      date: new Date(),
     };
     setOrder(newOrder);
-    setCurrentStep('confirmation');
+    setCurrentStep("confirmation");
   };
 
   const handleContinueShopping = () => {
     if (onNavigateToProducts) {
       onNavigateToProducts();
     } else {
-      setCurrentStep('cart');
+      setCurrentStep("cart");
       setShippingInfo({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: ''
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        address: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "",
       });
       setPaymentMethod({
-        type: 'credit',
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        cardholderName: '',
-        paypalEmail: ''
+        type: "credit",
+        cardNumber: "",
+        expiryDate: "",
+        cvv: "",
+        cardholderName: "",
+        paypalEmail: "",
       });
       setOrder(null);
     }
@@ -111,7 +116,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
 
   const renderStepContent = () => {
     switch (currentStep) {
-      case 'cart':
+      case "cart":
         return (
           <div className="space-y-4 md:space-y-6">
             <CartReview />
@@ -128,7 +133,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
           </div>
         );
 
-      case 'shipping':
+      case "shipping":
         return (
           <div className="space-y-4 md:space-y-6">
             <ShippingForm
@@ -147,7 +152,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
           </div>
         );
 
-      case 'payment':
+      case "payment":
         return (
           <div className="space-y-4 md:space-y-6">
             <PaymentForm
@@ -166,7 +171,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
           </div>
         );
 
-      case 'summary':
+      case "summary":
         return (
           <div className="space-y-4 md:space-y-6">
             <OrderSummary
@@ -185,7 +190,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
           </div>
         );
 
-      case 'confirmation':
+      case "confirmation":
         return order ? (
           <OrderConfirmation
             order={order}
@@ -198,7 +203,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
     }
   };
 
-  if (currentStep === 'confirmation') {
+  if (currentStep === "confirmation") {
     return renderStepContent();
   }
 
@@ -220,7 +225,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
               onClick={onNavigateToProducts || handleContinueShopping}
               className="text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base transition-colors duration-200"
             >
-              {isMobile ? '← Back' : 'Continue Shopping'}
+              {isMobile ? "← Back" : "Continue Shopping"}
             </button>
           </div>
         </div>
@@ -234,7 +239,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
               // Mobile: Horizontal scrollable steps
               <div className="flex items-center space-x-4 overflow-x-auto pb-2 scrollbar-hide">
                 {steps.map((step, index) => {
-                  const stepIndex = steps.findIndex(s => s.id === currentStep);
+                  const stepIndex = steps.findIndex(
+                    (s) => s.id === currentStep
+                  );
                   const isActive = step.id === currentStep;
                   const isCompleted = index < stepIndex;
 
@@ -244,17 +251,17 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
                         <div
                           className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
                             isActive
-                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-110'
+                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-110"
                               : isCompleted
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
-                              : 'bg-gray-200 text-gray-500'
+                              ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md"
+                              : "bg-gray-200 text-gray-500"
                           }`}
                         >
-                          {isCompleted ? '✓' : step.icon}
+                          {isCompleted ? "✓" : step.icon}
                         </div>
                         <span
                           className={`mt-2 text-xs font-medium ${
-                            isActive ? 'text-blue-600' : 'text-gray-500'
+                            isActive ? "text-blue-600" : "text-gray-500"
                           }`}
                         >
                           {step.shortName}
@@ -268,7 +275,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
               // Desktop: Full progress bar
               <div className="flex items-center justify-between">
                 {steps.map((step, index) => {
-                  const stepIndex = steps.findIndex(s => s.id === currentStep);
+                  const stepIndex = steps.findIndex(
+                    (s) => s.id === currentStep
+                  );
                   const isActive = step.id === currentStep;
                   const isCompleted = index < stepIndex;
 
@@ -278,17 +287,17 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
                             isActive
-                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
                               : isCompleted
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
-                              : 'bg-gray-200 text-gray-500'
+                              ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                              : "bg-gray-200 text-gray-500"
                           }`}
                         >
-                          {isCompleted ? '✓' : step.icon}
+                          {isCompleted ? "✓" : step.icon}
                         </div>
                         <span
                           className={`mt-2 text-xs font-medium ${
-                            isActive ? 'text-blue-600' : 'text-gray-500'
+                            isActive ? "text-blue-600" : "text-gray-500"
                           }`}
                         >
                           {step.name}
@@ -297,7 +306,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
                       {index < steps.length - 1 && (
                         <div
                           className={`w-16 h-0.5 mx-4 transition-all duration-300 ${
-                            isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-200'
+                            isCompleted
+                              ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                              : "bg-gray-200"
                           }`}
                         />
                       )}
@@ -317,27 +328,16 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
         </div>
       </main>
 
-      {/* Floating Action Button for Mobile */}
-      {isMobile && (currentStep as string) !== 'confirmation' && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-4 shadow-2xl floating-pulse">
-            <div className="text-white text-center">
-              <div className="text-xs font-medium">Step {steps.findIndex(s => s.id === currentStep) + 1}</div>
-              <div className="text-sm font-bold">of {steps.length}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Mobile Step Indicator */}
       {isMobile && (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-40">
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-600">
-              {steps.findIndex(s => s.id === currentStep) + 1} of {steps.length}
+              {steps.findIndex((s) => s.id === currentStep) + 1} of{" "}
+              {steps.length}
             </span>
             <div className="flex space-x-2">
-              {currentStep !== 'cart' && (
+              {currentStep !== "cart" && (
                 <button
                   onClick={handleBack}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium transition-colors duration-200"
@@ -345,18 +345,19 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
                   Back
                 </button>
               )}
-              {(currentStep as string) !== 'confirmation' && currentStep !== 'summary' && (
-                <button
-                  onClick={handleNext}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105"
-                >
-                  Next
-                </button>
-              )}
+              {(currentStep as string) !== "confirmation" &&
+                currentStep !== "summary" && (
+                  <button
+                    onClick={handleNext}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105"
+                  >
+                    Next
+                  </button>
+                )}
             </div>
           </div>
         </div>
       )}
     </div>
   );
-}; 
+};
