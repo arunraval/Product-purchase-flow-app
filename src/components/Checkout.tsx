@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CartReview } from './CartReview';
 import { ShippingForm } from './ShippingForm';
 import { PaymentForm } from './PaymentForm';
@@ -34,13 +34,24 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
     paypalEmail: ''
   });
   const [order, setOrder] = useState<Order | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const steps = [
-    { id: 'cart', name: 'Cart Review', icon: '🛒' },
-    { id: 'shipping', name: 'Shipping', icon: '📦' },
-    { id: 'payment', name: 'Payment', icon: '💳' },
-    { id: 'summary', name: 'Summary', icon: '📋' },
-    { id: 'confirmation', name: 'Confirmation', icon: '✅' }
+    { id: 'cart', name: 'Cart', icon: '🛒', shortName: 'Cart' },
+    { id: 'shipping', name: 'Shipping', icon: '📦', shortName: 'Ship' },
+    { id: 'payment', name: 'Payment', icon: '💳', shortName: 'Pay' },
+    { id: 'summary', name: 'Summary', icon: '📋', shortName: 'Review' },
+    { id: 'confirmation', name: 'Done', icon: '✅', shortName: 'Done' }
   ];
 
   const handleNext = () => {
@@ -102,15 +113,15 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
     switch (currentStep) {
       case 'cart':
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <CartReview />
             {state.items.length > 0 && (
               <div className="flex justify-end">
                 <button
                   onClick={handleNext}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
-                  Proceed to Shipping
+                  Continue to Shipping →
                 </button>
               </div>
             )}
@@ -119,7 +130,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
 
       case 'shipping':
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <ShippingForm
               shippingInfo={shippingInfo}
               onUpdate={setShippingInfo}
@@ -128,9 +139,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105"
               >
-                Back to Cart
+                ← Back to Cart
               </button>
             </div>
           </div>
@@ -138,7 +149,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
 
       case 'payment':
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <PaymentForm
               paymentMethod={paymentMethod}
               onUpdate={setPaymentMethod}
@@ -147,9 +158,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105"
               >
-                Back to Shipping
+                ← Back to Shipping
               </button>
             </div>
           </div>
@@ -157,7 +168,7 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
 
       case 'summary':
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <OrderSummary
               shippingInfo={shippingInfo}
               paymentMethod={paymentMethod}
@@ -166,9 +177,9 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105"
               >
-                Back to Payment
+                ← Back to Payment
               </button>
             </div>
           </div>
@@ -192,73 +203,160 @@ export const Checkout: React.FC<CheckoutProps> = ({ onNavigateToProducts }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Mobile Header */}
+      <header className="bg-white shadow-lg border-b sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-bold">C</span>
+              </div>
+              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Checkout
+              </h1>
+            </div>
             <button
               onClick={onNavigateToProducts || handleContinueShopping}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base transition-colors duration-200"
             >
-              Continue Shopping
+              {isMobile ? '← Back' : 'Continue Shopping'}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Progress Steps */}
-      <div className="bg-white border-b">
+      {/* Mobile Progress Steps */}
+      <div className="bg-white border-b shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-6">
-            <div className="flex items-center justify-between">
-              {steps.map((step, index) => {
-                const stepIndex = steps.findIndex(s => s.id === currentStep);
-                const isActive = step.id === currentStep;
-                const isCompleted = index < stepIndex;
+          <div className="py-4 md:py-6">
+            {isMobile ? (
+              // Mobile: Horizontal scrollable steps
+              <div className="flex items-center space-x-4 overflow-x-auto pb-2 scrollbar-hide">
+                {steps.map((step, index) => {
+                  const stepIndex = steps.findIndex(s => s.id === currentStep);
+                  const isActive = step.id === currentStep;
+                  const isCompleted = index < stepIndex;
 
-                return (
-                  <div key={step.id} className="flex items-center">
-                    <div className="flex flex-col items-center">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                          isActive
-                            ? 'bg-blue-600 text-white'
-                            : isCompleted
-                            ? 'bg-green-500 text-white'
-                            : 'bg-gray-200 text-gray-500'
-                        }`}
-                      >
-                        {isCompleted ? '✓' : step.icon}
+                  return (
+                    <div key={step.id} className="flex-shrink-0">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
+                            isActive
+                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-110'
+                              : isCompleted
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
+                              : 'bg-gray-200 text-gray-500'
+                          }`}
+                        >
+                          {isCompleted ? '✓' : step.icon}
+                        </div>
+                        <span
+                          className={`mt-2 text-xs font-medium ${
+                            isActive ? 'text-blue-600' : 'text-gray-500'
+                          }`}
+                        >
+                          {step.shortName}
+                        </span>
                       </div>
-                      <span
-                        className={`mt-2 text-xs font-medium ${
-                          isActive ? 'text-blue-600' : 'text-gray-500'
-                        }`}
-                      >
-                        {step.name}
-                      </span>
                     </div>
-                    {index < steps.length - 1 && (
-                      <div
-                        className={`w-16 h-0.5 mx-4 ${
-                          isCompleted ? 'bg-green-500' : 'bg-gray-200'
-                        }`}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            ) : (
+              // Desktop: Full progress bar
+              <div className="flex items-center justify-between">
+                {steps.map((step, index) => {
+                  const stepIndex = steps.findIndex(s => s.id === currentStep);
+                  const isActive = step.id === currentStep;
+                  const isCompleted = index < stepIndex;
+
+                  return (
+                    <div key={step.id} className="flex items-center">
+                      <div className="flex flex-col items-center">
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
+                            isActive
+                              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                              : isCompleted
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                              : 'bg-gray-200 text-gray-500'
+                          }`}
+                        >
+                          {isCompleted ? '✓' : step.icon}
+                        </div>
+                        <span
+                          className={`mt-2 text-xs font-medium ${
+                            isActive ? 'text-blue-600' : 'text-gray-500'
+                          }`}
+                        >
+                          {step.name}
+                        </span>
+                      </div>
+                      {index < steps.length - 1 && (
+                        <div
+                          className={`w-16 h-0.5 mx-4 transition-all duration-300 ${
+                            isCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-200'
+                          }`}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderStepContent()}
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-gray-100">
+          {renderStepContent()}
+        </div>
       </main>
+
+      {/* Floating Action Button for Mobile */}
+      {isMobile && (currentStep as string) !== 'confirmation' && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-4 shadow-2xl floating-pulse">
+            <div className="text-white text-center">
+              <div className="text-xs font-medium">Step {steps.findIndex(s => s.id === currentStep) + 1}</div>
+              <div className="text-sm font-bold">of {steps.length}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Step Indicator */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 z-40">
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">
+              {steps.findIndex(s => s.id === currentStep) + 1} of {steps.length}
+            </span>
+            <div className="flex space-x-2">
+              {currentStep !== 'cart' && (
+                <button
+                  onClick={handleBack}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium transition-colors duration-200"
+                >
+                  Back
+                </button>
+              )}
+              {(currentStep as string) !== 'confirmation' && currentStep !== 'summary' && (
+                <button
+                  onClick={handleNext}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105"
+                >
+                  Next
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 
